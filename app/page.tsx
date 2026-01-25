@@ -1,17 +1,20 @@
 
+
+
+
+import Section1 from "../modules/dashboard/components/section1";
 import BlogCard from "../shared/components/elements/BlogCard";
+import Counter from "../modules/dashboard/components/counter";
+import CentralHub from "../modules/dashboard/components/centralhub";
+import Revolution from "../modules/dashboard/components/revolution";
 
 export default function Home() {
   return (
     <>
-      <BlogCard
-        id="1"
-        title="Sample Blog Title"
-        summary_image_url="/assets/sample.jpg"
-        category="Finance"
-        date="2026-01-25"
-        title_filter="sample-blog-title"
-      />
+      <Section1 />
+      <Counter />
+      <CentralHub />
+      <Revolution />
     </>
   );
 }
