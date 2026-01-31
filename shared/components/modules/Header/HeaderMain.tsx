@@ -3,9 +3,10 @@ import React from "react";
 import Modal from "./Modal";
 import RegistrationForm from "./registration";
 import LoginForm from "./login";
+import Link from "next/link";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
+  { label: "Booking", href: "/booking" },
   { label: "Pricing", href: "#pricing" },
   { label: "Testimonials", href: "#testimonials" },
   { label: "Contact", href: "#contact" },
@@ -24,17 +25,19 @@ export default function HeaderMain() {
               <path d="M9 3L15 9L9 15L3 9L9 3Z" fill="#2196F3"/>
             </svg>
           </span>
-          <span className="font-bold text-lg tracking-tight">HostelManage</span>
+          <Link href="/" className="font-bold text-lg tracking-tight">
+             HostelManage
+          </Link>
         </div>
         <nav className="flex items-center gap-6">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="flex items-center gap-2">
