@@ -23,13 +23,27 @@ const BookingMain = () => {
 	const [selectedRoomType, setSelectedRoomType] = useState("all");
 
 	// Example data
-	const stats = [
+	const stats: { label: string; value: number; status: "success" | "danger" | "warning"; subtext: string }[] = [
 		{ label: "Total Beds", value: 250, status: "success", subtext: "Capacity is 100%" },
 		{ label: "Occupied", value: 185, status: "success", subtext: "74% Occupancy" },
 		{ label: "Available", value: 65, status: "danger", subtext: "-2% from yesterday" },
 	];
 
-	const rooms = [
+	type RoomStatus = "partial" | "full" | "empty" | "maintenance" | "reserved";
+
+	const rooms: {
+		roomNumber: string;
+		type: string;
+		status: RoomStatus;
+		beds: {
+			id: string;
+			status: string;
+			guestName?: string;
+			guestProfileUrl?: string;
+			checkIn?: string;
+			checkOut?: string;
+		}[];
+	}[] = [
 		{
 			roomNumber: "101",
 			type: "AC Deluxe",
@@ -76,11 +90,7 @@ const BookingMain = () => {
 				<ActionButton label="Add New Room" onClick={() => alert("Add Room")}/>
 			</div>
 
-			<div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-				{rooms.map((room) => (
-					<RoomCard key={room.roomNumber} {...room} />
-				))}
-			</div>
+			
 		</div>
 	);
 };
