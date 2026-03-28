@@ -15,6 +15,28 @@ const navLinks = [
 export default function HeaderMain() {
   const [open, setOpen] = React.useState(false);
   const [loginOpen, setLoginOpen] = React.useState(false);
+  const [user, setUser] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    // Check localStorage for user info on mount
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+    // Listen for login event
+    const handler = () => {
+      const u = localStorage.getItem("user");
+      setUser(u ? JSON.parse(u) : null);
+      setLoginOpen(false);
+      setOpen(false);
+    };
+    window.addEventListener("user-login", handler);
+    return () => window.removeEventListener("user-login", handler);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
   return (
     <>
       <header className="w-full flex items-center justify-between px-6 py-3 bg-white shadow-sm">
@@ -41,20 +63,33 @@ export default function HeaderMain() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="px-4 py-2 rounded-md bg-blue-500 text-white font-semibold text-sm shadow hover:bg-blue-600 transition-colors"
-            onClick={() => setOpen(true)}
-          >
-            Register
-          </button>
-          <button
-            type="button"
-            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-semibold text-sm hover:bg-gray-200 transition-colors"
-            onClick={() => setLoginOpen(true)}
-          >
-            Login
-          </button>
+          {user ? (
+            <>
+              <span className="font-semibold text-blue-600">{user.name}</span>
+              <button
+                type="button"
+                className="px-3 py-1 rounded bg-gray-200 text-gray-700 text-xs ml-2 hover:bg-gray-300"
+                onClick={handleLogout}
+              >Logout</button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-md bg-blue-500 text-white font-semibold text-sm shadow hover:bg-blue-600 transition-colors"
+                onClick={() => setOpen(true)}
+              >
+                Register
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-semibold text-sm hover:bg-gray-200 transition-colors"
+                onClick={() => setLoginOpen(true)}
+              >
+                Login
+              </button>
+            </>
+          )}
         </div>
       </header>
       <Modal open={open} onClose={() => setOpen(false)}>

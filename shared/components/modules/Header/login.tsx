@@ -1,6 +1,37 @@
-import React from "react";
+
+import React, { useState } from "react";
 
 export default function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5125/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || "Login failed");
+      } else {
+        // Store user info in localStorage
+        localStorage.setItem("user", JSON.stringify(data.data));
+        window.dispatchEvent(new Event("user-login")); // trigger UI update
+      }
+    } catch (err) {
+      setError("Network error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2">
@@ -13,14 +44,21 @@ export default function LoginForm() {
         <h2 className="text-2xl font-bold text-center">Welcome Back, Admin</h2>
         <p className="text-gray-500 text-center text-sm">Manage your residents and bookings seamlessly.</p>
       </div>
-      <form className="flex flex-col gap-4">
+  <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div>
           <label className="block text-sm font-semibold mb-1">Email Address</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16v16H4z" stroke="none"/><path d="M22 6l-10 7L2 6"/></svg>
             </span>
-            <input type="email" placeholder="name@hostel.com" className="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200" />
+            <input
+              type="email"
+              placeholder="name@hostel.com"
+              className="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
           </div>
         </div>
         <div>
@@ -32,7 +70,14 @@ export default function LoginForm() {
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
             </span>
-            <input type="password" placeholder="••••••••" className="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200" />
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </span>
@@ -42,7 +87,14 @@ export default function LoginForm() {
           <input type="checkbox" id="remember" className="accent-blue-500" />
           <label htmlFor="remember" className="text-sm text-gray-600">Remember this device</label>
         </div>
-        <button type="submit" className="w-full py-2 rounded-md bg-blue-500 text-white font-semibold text-base shadow hover:bg-blue-600 transition-colors">Login to Dashboard <span className="ml-2">→</span></button>
+        <button
+          type="submit"
+          className="w-full py-2 rounded-md bg-blue-500 text-white font-semibold text-base shadow hover:bg-blue-600 transition-colors"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : <>Login to Dashboard <span className="ml-2">→</span></>}
+        </button>
+        {error && <div className="text-red-500 text-sm text-center mt-2">{error}</div>}
       </form>
       <div className="text-center text-sm text-gray-500">
         New administrator? <a href="#" className="text-blue-500 font-semibold hover:underline">Create an account</a>
