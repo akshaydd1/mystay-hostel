@@ -6,6 +6,7 @@ interface RegistrationFormData {
   name: string;
   email: string;
   mobile_no: string;
+  password: string;
   city: string;
   state: string;
   docType: string;
@@ -16,6 +17,7 @@ const initialFormData: RegistrationFormData = {
   name: "",
   email: "",
   mobile_no: "",
+  password: "",
   city: "",
   state: "",
   docType: "",
@@ -49,8 +51,8 @@ const RegistrationForm = () => {
     setSuccess(null);
 
     // Basic validation
-    const { name, email, mobile_no, city, state, docType, docNumber } = formData;
-    if (!name || !email || !mobile_no || !city || !state || !docType || !docNumber) {
+    const { name, email, mobile_no, password, city, state, docType, docNumber } = formData;
+    if (!name || !email || !mobile_no || !password || !city || !state || !docType || !docNumber) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -67,6 +69,7 @@ const RegistrationForm = () => {
           name,
           email,
           mobile_no,
+          password,
           city,
           state,
           docType,
@@ -147,6 +150,19 @@ const RegistrationForm = () => {
               required
             />
           </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+            placeholder="Enter a strong password"
+            minLength={6}
+            required
+          />
         </div>
         <div className="flex gap-2">
           <div className="flex-1">
