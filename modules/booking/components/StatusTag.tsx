@@ -1,7 +1,7 @@
 import React from "react";
 
 interface StatusTagProps {
-  status: "available" | "occupied" | "reserved" | "maintenance" | "partial" | "full" | "empty";
+  status: "available" | "occupied" | "reserved" | "maintenance" | "partial" | "full" | "empty" | "paid" | "unpaid" | "pending";
   children?: React.ReactNode;
 }
 
@@ -13,6 +13,9 @@ const statusStyles: Record<string, React.CSSProperties> = {
   partial: { background: "#F59E42", color: "#fff" },
   full: { background: "#EF4444", color: "#fff" },
   empty: { background: "#22C55E", color: "#fff" },
+  paid: { background: "#22C55E", color: "#fff" },
+  unpaid: { background: "#EF4444", color: "#fff" },
+  pending: { background: "#EF4444", color: "#fff" },
 };
 
 export const StatusTag: React.FC<StatusTagProps> = ({ status, children }) => (
