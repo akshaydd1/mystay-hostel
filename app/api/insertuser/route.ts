@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = "http://localhost:5125/api/insertuser";
+const BACKEND_URL = "http://localhost:5125/api/User/insert";
 
 export async function POST(request: NextRequest) {
   try {

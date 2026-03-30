@@ -12,7 +12,7 @@ export default function LoginForm() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5125/api/login", {
+      const res = await fetch("http://localhost:5125/api/User/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
