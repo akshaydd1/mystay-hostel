@@ -1,26 +1,60 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StatsSummary } from "./components/StatsSummary";
-import { RoomCard } from "./components/RoomCard";
-import { Dropdown } from "./components/Dropdown";
-import { StatusTag } from "./components/StatusTag";
 import { ActionButton } from "./components/ActionButton";
-
-
-const floorOptions = [
-	{ label: "All Floors", value: "all" },
-	{ label: "Floor 1", value: "1" },
-	{ label: "Floor 2", value: "2" },
-];
-const roomTypeOptions = [
-	{ label: "Room Type: All", value: "all" },
-	{ label: "AC Deluxe", value: "ac" },
-	{ label: "Standard", value: "standard" },
-];
+import { AddRoomForm } from "./components/AddRoomForm";
+import { RoomDetailsTable } from "./components/RoomDetailsTable";
+import { UpdateRoomModal } from "./components/UpdateRoomModal";
+import {
+	fetchAllRooms,
+	insertRoom,
+	updateRoom,
+	deleteRoom,
+	type RoomDetail,
+} from "./services/roomDetailApi";
 
 const BookingMain = () => {
-	const [selectedFloor, setSelectedFloor] = useState("all");
-	const [selectedRoomType, setSelectedRoomType] = useState("all");
+	const [showAddForm, setShowAddForm] = useState(false);
+
+	// Room detail state
+	const [rooms, setRooms] = useState<RoomDetail[]>([]);
+	const [roomsLoading, setRoomsLoading] = useState(true);
+	const [updateModalRoom, setUpdateModalRoom] = useState<RoomDetail | null>(null);
+
+	const loadRooms = useCallback(async () => {
+		setRoomsLoading(true);
+		try {
+			const data = await fetchAllRooms();
+			setRooms(data);
+		} catch (err) {
+			console.error("Failed to load rooms:", err);
+		} finally {
+			setRoomsLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		loadRooms();
+	}, [loadRooms]);
+
+	const handleInsertRoom = async (data: { room_no: string; floor_no: number; room_type: string }) => {
+		await insertRoom(data);
+	};
+
+	const handleUpdateRoom = async (id: number, data: { room_no: string; floor_no: number; room_type: string }) => {
+		await updateRoom(id, data);
+		await loadRooms();
+	};
+
+	const handleDeleteRoom = async (room: RoomDetail) => {
+		if (!window.confirm(`Are you sure you want to delete Room ${room.room_no}?`)) return;
+		try {
+			await deleteRoom(room.id);
+			await loadRooms();
+		} catch (err) {
+			alert(err instanceof Error ? err.message : "Failed to delete room.");
+		}
+	};
 
 	// Example data
 	const stats: { label: string; value: number; status: "success" | "danger" | "warning"; subtext: string }[] = [
@@ -29,68 +63,48 @@ const BookingMain = () => {
 		{ label: "Available", value: 65, status: "danger", subtext: "-2% from yesterday" },
 	];
 
-	type RoomStatus = "partial" | "full" | "empty" | "maintenance" | "reserved";
-
-	const rooms: {
-		roomNumber: string;
-		type: string;
-		status: RoomStatus;
-		beds: {
-			id: string;
-			status: string;
-			guestName?: string;
-			guestProfileUrl?: string;
-			checkIn?: string;
-			checkOut?: string;
-		}[];
-	}[] = [
-		{
-			roomNumber: "101",
-			type: "AC Deluxe",
-			status: "partial",
-			beds: [
-				{ id: "b1", status: "occupied", guestName: "Marcus Wright", guestProfileUrl: "#", checkIn: "Oct 14", checkOut: "Oct 16" },
-				{ id: "b2", status: "available" },
-			],
-		},
-		{
-			roomNumber: "102",
-			type: "Standard",
-			status: "full",
-			beds: [
-				{ id: "b1", status: "occupied", guestName: "Sarah Jenkins", guestProfileUrl: "#", checkIn: "Dec 01", checkOut: "Dec 04" },
-				{ id: "b2", status: "occupied", guestName: "Alice Cooper", guestProfileUrl: "#", checkIn: "Dec 01", checkOut: "Dec 04" },
-			],
-		},
-		{
-			roomNumber: "103",
-			type: "AC Deluxe",
-			status: "empty",
-			beds: [
-				{ id: "b1", status: "available" },
-				{ id: "b2", status: "available" },
-			],
-		},
-	];
-
 	return (
-		<div style={{ padding: 32, background: "#F9FAFB" }}>
+		<div style={{ padding: 32, background: "#F9FAFB", minHeight: "100vh" }}>
 			<h2 style={{ fontWeight: 700, fontSize: 28, marginBottom: 8 }}>Bed Booking Dashboard</h2>
 			<p style={{ color: "#6B7280", marginBottom: 24 }}>Manage and monitor real-time room occupancy and guest bookings.</p>
 
 			<div style={{ display: "flex", gap: 24, marginBottom: 32 }}>
-				{stats.map((stat, idx) => (
+				{stats.map((stat) => (
 					<StatsSummary key={stat.label} {...stat} />
 				))}
 			</div>
 
 			<div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-				<Dropdown options={floorOptions} value={selectedFloor} onChange={setSelectedFloor} />
-				<Dropdown options={roomTypeOptions} value={selectedRoomType} onChange={setSelectedRoomType} />
-				<ActionButton label="Add New Room" onClick={() => alert("Add Room")}/>
+				<ActionButton label={showAddForm ? "Cancel" : "Add New Room"} onClick={() => setShowAddForm((prev) => !prev)} />
 			</div>
 
-			
+			{/* Add New Room Form */}
+			{showAddForm && (
+				<AddRoomForm
+					onRoomAdded={() => {
+						loadRooms();
+						setShowAddForm(false);
+					}}
+					onInsertRoom={handleInsertRoom}
+				/>
+			)}
+
+			{/* Room Details Table */}
+			<RoomDetailsTable
+				rooms={rooms}
+				loading={roomsLoading}
+				onUpdateClick={(room) => setUpdateModalRoom(room)}
+				onDeleteClick={handleDeleteRoom}
+			/>
+
+			{/* Update Room Modal */}
+			{updateModalRoom && (
+				<UpdateRoomModal
+					room={updateModalRoom}
+					onClose={() => setUpdateModalRoom(null)}
+					onSave={handleUpdateRoom}
+				/>
+			)}
 		</div>
 	);
 };
